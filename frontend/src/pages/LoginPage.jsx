@@ -1,22 +1,78 @@
 /**
- * LoginPage — Modern Glassmorphism Auth for Email & Password Login
+ * LoginPage — Modern Glassmorphism Auth with Facebook OAuth & Email/Password
  */
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, Loader2, CheckCircle2, AlertTriangle, UserPlus, LogIn } from 'lucide-react';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  FacebookAuthProvider, 
+  signInWithPopup 
+} from 'firebase/auth';
 import { auth } from '../firebase';
 import '../styles/LoginPage.css';
 
-export default function LoginPage({ onLoginSuccess }) {
-  const navigate = useNavigate();
+const FacebookIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+  </svg>
+);
 
+export default function LoginPage({ onLoginSuccess }) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState({ type: '', message: '' });
+
+  // Facebook OAuth Login
+  const handleFacebookLogin = async () => {
+    setLoading(true);
+    setStatus({ 
+      type: 'loading', 
+      message: 'Đang chuyển hướng sang Facebook... Vui lòng xác nhận cho phép.' 
+    });
+
+    const provider = new FacebookAuthProvider();
+    provider.addScope('public_profile');
+    provider.addScope('email');
+    provider.setCustomParameters({
+      display: 'popup'
+    });
+
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      setStatus({ 
+        type: 'success', 
+        message: `Đăng nhập Facebook thành công! Xin chào ${user.displayName || 'bạn'}` 
+      });
+
+      if (onLoginSuccess) {
+        await onLoginSuccess();
+      }
+    } catch (err) {
+      console.error("Facebook Login Error:", err);
+      let friendlyMessage = 'Đăng nhập Facebook thất bại.';
+      
+      if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
+        friendlyMessage = '❌ Bạn đã hủy đăng nhập Facebook hoặc từ chối cấp quyền truy cập.';
+      } else if (err.code === 'auth/account-exists-with-different-credential') {
+        friendlyMessage = '⚠️ Email này đã được đăng ký bằng phương thức khác. Vui lòng đăng nhập bằng Email.';
+      } else if (err.code === 'auth/operation-not-allowed') {
+        friendlyMessage = '⚠️ Đăng nhập Facebook chưa được kích hoạt trong Firebase Console. Vui lòng bật Facebook provider.';
+      } else if (err.code === 'auth/popup-blocked') {
+        friendlyMessage = '⚠️ Trình duyệt đã chặn cửa sổ pop-up. Vui lòng bật cho phép mở pop-up Facebook trên trình duyệt.';
+      } else {
+        friendlyMessage = `❌ Đăng nhập thất bại: ${err.message || friendlyMessage}`;
+      }
+
+      setStatus({ type: 'error', message: friendlyMessage });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAuth = async (e) => {
     e.preventDefault();
@@ -42,11 +98,9 @@ export default function LoginPage({ onLoginSuccess }) {
 
     try {
       if (isSignUp) {
-        // Sign Up Flow
         await createUserWithEmailAndPassword(auth, trimmedEmail, trimmedPassword);
         setStatus({ type: 'success', message: 'Tạo tài khoản thành công!' });
       } else {
-        // Sign In Flow
         await signInWithEmailAndPassword(auth, trimmedEmail, trimmedPassword);
         setStatus({ type: 'success', message: 'Đăng nhập thành công!' });
       }
@@ -88,8 +142,30 @@ export default function LoginPage({ onLoginSuccess }) {
           <h1>Tools Marketing</h1>
         </div>
         <p className="login-subtitle">
-          {isSignUp ? 'Đăng ký tài khoản marketing mới' : 'Đăng nhập tài khoản hệ thống'}
+          Hệ thống tự động hóa Marketing Facebook
         </p>
+
+        {/* Facebook 1-Click Login Button */}
+        <button
+          type="button"
+          className="btn-facebook"
+          onClick={handleFacebookLogin}
+          disabled={loading}
+        >
+          {loading && status.type === 'loading' ? (
+            <>
+              <Loader2 size={20} className="spinner-anim" /> Đang chuyển sang Facebook...
+            </>
+          ) : (
+            <>
+              <FacebookIcon /> ĐĂNG NHẬP BẰNG FACEBOOK
+            </>
+          )}
+        </button>
+
+        <div className="auth-divider">
+          <span>Hoặc dùng tài khoản Email</span>
+        </div>
 
         <form onSubmit={handleAuth}>
           <div className="form-group">
@@ -143,11 +219,11 @@ export default function LoginPage({ onLoginSuccess }) {
               </>
             ) : isSignUp ? (
               <>
-                <UserPlus size={20} /> ĐĂNG KÝ NGAY
+                <UserPlus size={20} /> ĐĂNG KÝ EMAIL
               </>
             ) : (
               <>
-                <LogIn size={20} /> ĐĂNG NHẬP HỆ THỐNG
+                <LogIn size={20} /> ĐĂNG NHẬP EMAIL
               </>
             )}
           </button>
@@ -163,7 +239,7 @@ export default function LoginPage({ onLoginSuccess }) {
                 setStatus({ type: '', message: '' });
               }
             }}>
-              {isSignUp ? 'Đăng nhập tại đây' : 'Đăng ký ngay'}
+              {isSignUp ? 'Đăng nhập tại đây' : 'Đăng ký nhanh'}
             </a>
           </span>
         </div>

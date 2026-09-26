@@ -56,11 +56,73 @@
   text-align: center;
   color: var(--text-sub);
   font-size: 0.9rem;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
+}
+
+/* Facebook Login Button */
+.btn-facebook {
+  background: #1877F2;
+  color: #ffffff;
+  width: 100%;
+  box-shadow: 0 4px 18px rgba(24, 119, 242, 0.35);
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 15px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border-radius: 12px;
+  transition: all 200ms ease;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-facebook:hover:not(:disabled) {
+  background: #166fe5;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(24, 119, 242, 0.5);
+}
+
+.btn-facebook:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-facebook:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Auth Divider */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 24px 0 20px 0;
+  color: var(--text-sub);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.auth-divider:not(:empty)::before {
+  margin-right: 14px;
+}
+
+.auth-divider:not(:empty)::after {
+  margin-left: 14px;
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .form-group label {
@@ -145,13 +207,26 @@
   text-align: center;
   font-weight: 600;
   font-size: 0.88rem;
-  padding: 10px;
-  border-radius: 8px;
-  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin-top: 16px;
+  line-height: 1.4;
 }
 
 .status-message.error {
-  color: var(--accent-rose);
-  background: rgba(244, 63, 94, 0.1);
-  border: 1px solid rgba(244, 63, 94, 0.2);
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.status-message.success {
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-message.loading {
+  color: #60a5fa;
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.3);
 }
