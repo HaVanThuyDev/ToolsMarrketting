@@ -1,0 +1,96 @@
+/* =====================================================
+   HISTORY TAB STYLES
+   ===================================================== */
+.modern-table-container {
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.modern-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--bg-dark);
+}
+
+.modern-table th {
+  background: var(--bg-card);
+  padding: 16px 20px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-sub);
+  text-align: left;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.modern-table td {
+  padding: 16px 20px;
+  font-size: 0.9rem;
+  color: var(--text-main);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.modern-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.status-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 99px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.status-badge-pill.success {
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--accent-emerald);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-badge-pill.error {
+  background: rgba(244, 63, 94, 0.12);
+  color: var(--accent-rose);
+  border: 1px solid rgba(244, 63, 94, 0.3);
+}
+
+.status-badge-pill.pending {
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--accent-amber);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.link-external-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent-cyan);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 150ms ease;
+}
+
+.link-external-btn:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.empty-state-card {
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--text-sub);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.empty-state-card svg {
+  color: var(--text-muted);
+}

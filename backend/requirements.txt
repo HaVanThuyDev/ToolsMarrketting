@@ -1,0 +1,8 @@
+fastapi>=0.104
+uvicorn[standard]>=0.24
+firebase-admin>=6.2
+requests>=2.31
+playwright>=1.40
+openpyxl>=3.1
+python-dotenv>=1.0
+python-multipart>=0.0.6

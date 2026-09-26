@@ -1,0 +1,111 @@
+/* =====================================================
+   COOKIE PAGE STYLES
+   ===================================================== */
+.cookie-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--grad-login-bg);
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.cookie-page::before {
+  content: '';
+  position: absolute;
+  top: -30%;
+  right: -20%;
+  width: 140%;
+  height: 140%;
+  background: radial-gradient(circle at 60% 40%, rgba(56, 189, 248, 0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.cookie-card {
+  width: 100%;
+  max-width: 580px;
+  background: rgba(17, 23, 38, 0.88);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 24px;
+  padding: 44px 38px;
+  box-shadow: var(--shadow-card), 0 0 60px rgba(56, 189, 248, 0.05);
+  position: relative;
+  z-index: 1;
+}
+
+.guide-box {
+  background: rgba(11, 15, 25, 0.8);
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid var(--accent-cyan);
+  border-radius: 14px;
+  padding: 18px 22px;
+  margin-bottom: 24px;
+}
+
+.guide-box h3 {
+  color: var(--accent-cyan);
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.guide-box p {
+  color: var(--text-sub);
+  font-size: 0.87rem;
+  line-height: 1.8;
+}
+
+textarea.form-input {
+  min-height: 120px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.status-message.loading {
+  color: var(--accent-amber);
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.status-message.success {
+  color: var(--accent-emerald);
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.status-message.error {
+  color: var(--accent-rose);
+  background: rgba(244, 63, 94, 0.1);
+  border: 1px solid rgba(244, 63, 94, 0.2);
+}
+
+/* =====================================================
+   ANIMATIONS
+   ===================================================== */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(8px);
+  }
+}
+
+.spinner-anim {
+  animation: spin 1s linear infinite;
+}

@@ -1,0 +1,131 @@
+/* =====================================================
+   GROUPS TAB STYLES
+   ===================================================== */
+.search-box-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.search-box-wrapper svg {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.search-box-input {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 14px 18px 14px 48px;
+  color: var(--text-main);
+  font-size: 0.95rem;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  outline: none;
+  transition: all 200ms ease;
+}
+
+.search-box-input:focus {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+}
+
+.groups-scroll-grid {
+  background: var(--bg-dark);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  max-height: 440px;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.group-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 150ms ease;
+  user-select: none;
+  border: 1px solid transparent;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.group-row:hover {
+  background: var(--bg-card-hover);
+}
+
+.group-row.selected {
+  background: rgba(56, 189, 248, 0.08);
+  border-color: rgba(56, 189, 248, 0.25);
+}
+
+.custom-checkbox {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1.5px solid var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 150ms ease;
+  flex-shrink: 0;
+}
+
+.group-row.selected .custom-checkbox {
+  background: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+  color: #000;
+}
+
+.group-name-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-highlight);
+  flex: 1;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.actions-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.status-indicator-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-sub);
+}
+
+.btn-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-card-hover);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.btn-chip:hover {
+  background: var(--bg-card-active);
+  border-color: var(--border-medium);
+  transform: translateY(-1px);
+}

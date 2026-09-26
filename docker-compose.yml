@@ -1,0 +1,30 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tool-marketing-backend
+    restart: always
+    ports:
+      - "8001:8001"
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - tool-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: tool-marketing-frontend
+    restart: always
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    networks:
+      - tool-network
+
+networks:
+  tool-network:
+    driver: bridge
