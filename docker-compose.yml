@@ -1,5 +1,6 @@
 services:
   backend:
+    image: tool-backend:latest
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -13,6 +14,7 @@ services:
       - tool-network
 
   frontend:
+    image: tool-frontend:latest
     build:
       context: ./frontend
       dockerfile: Dockerfile
