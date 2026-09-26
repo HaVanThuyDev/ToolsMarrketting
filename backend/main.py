@@ -155,6 +155,26 @@ class CookieLoginResponse(BaseModel):
     message: str = ""
 
 
+class FacebookAccountLoginRequest(BaseModel):
+    account: str
+    password: str
+    two_factor_code: Optional[str] = None
+
+
+class FacebookAccountLoginResponse(BaseModel):
+    success: bool
+    requires_2fa: bool = False
+    user_id: str = ""
+    user_name: str = ""
+    message: str = ""
+
+
+class FacebookOAuthConnectRequest(BaseModel):
+    facebook_id: str
+    facebook_name: str
+    access_token: Optional[str] = None
+
+
 # =====================================================
 # DEPENDENCY: Extract & verify Firebase token
 # =====================================================
@@ -226,6 +246,95 @@ async def cookie_login(
         user_name=me.get("name", ""),
         message="Đăng nhập Facebook thành công!"
     )
+
+
+@app.post("/api/facebook/login-account", response_model=FacebookAccountLoginResponse)
+async def login_facebook_account(
+    request: FacebookAccountLoginRequest,
+    authorization: str = Header(...)
+):
+    """
+    Log into Facebook using email/phone and password via headless browser.
+    Extracts session cookies automatically and establishes user session.
+    No manual cookie extraction required!
+    """
+    user = await get_current_user(authorization)
+    uid = user["uid"]
+
+    fb = FacebookService()
+    result = fb.login_with_credentials(
+        account=request.account,
+        password=request.password,
+        two_factor_code=request.two_factor_code
+    )
+
+    if not result.get("success"):
+        return FacebookAccountLoginResponse(
+            success=False,
+            requires_2fa=result.get("requires_2fa", False),
+            message=result.get("message", "Đăng nhập Facebook thất bại.")
+        )
+
+    # Store active session in memory
+    _active_sessions[uid] = fb
+
+    cookie_str = result.get("cookie", "")
+    user_id = str(result.get("user_id", ""))
+    user_name = result.get("user_name", "")
+
+    # Save to storage
+    save_user_session(uid, {
+        "email": user["email"],
+        "fbCookie": cookie_str,
+        "fbUserId": user_id,
+        "fbUserName": user_name,
+        "lastLogin": datetime.now().isoformat(),
+    })
+
+    return FacebookAccountLoginResponse(
+        success=True,
+        requires_2fa=False,
+        user_id=user_id,
+        user_name=user_name,
+        message="Kết nối tài khoản Facebook thành công!"
+    )
+
+
+@app.post("/api/facebook/oauth-connect")
+async def oauth_connect(
+    request: FacebookOAuthConnectRequest,
+    authorization: str = Header(...)
+):
+    """
+    Connect user via Facebook OAuth / App permission.
+    Stores Facebook User ID, Name, and optional Access Token.
+    """
+    user = await get_current_user(authorization)
+    uid = user["uid"]
+
+    fb = _active_sessions.get(uid) or FacebookService()
+    fb.user_id = request.facebook_id
+    fb.user_name = request.facebook_name
+    if request.access_token:
+        fb.access_token = request.access_token
+    _active_sessions[uid] = fb
+
+    save_user_session(uid, {
+        "email": user["email"],
+        "fbUserId": request.facebook_id,
+        "fbUserName": request.facebook_name,
+        "fbAccessToken": request.access_token or "",
+        "lastLogin": datetime.now().isoformat(),
+    })
+
+    return {
+        "success": True,
+        "user_id": request.facebook_id,
+        "user_name": request.facebook_name,
+        "message": f"Kết nối Facebook thành công: {request.facebook_name}!"
+    }
+
+
 @app.post("/api/cookie/browser-login", response_model=CookieLoginResponse)
 async def browser_login(authorization: str = Header(...)):
     """
@@ -384,6 +493,16 @@ async def get_cookie_status(authorization: str = Header(...)):
             "user_id": str(fb.user_id or ""),
             "user_name": fb.user_name or ""
         }
+
+    # Check if saved user session has Facebook credentials
+    sess = get_user_session(uid)
+    if sess.get("fbUserId"):
+        return {
+            "logged_in": True,
+            "user_id": str(sess.get("fbUserId", "")),
+            "user_name": str(sess.get("fbUserName", ""))
+        }
+
     return {"logged_in": False}
 
 

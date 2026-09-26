@@ -125,6 +125,139 @@ class FacebookService:
         return me
 
     # =====================================================
+    # LOGIN BY CREDENTIALS (NO COOKIE NEEDED)
+    # =====================================================
+
+    def login_with_credentials(
+        self,
+        account,
+        password,
+        two_factor_code=None
+    ):
+        """
+        Đăng nhập tự động bằng Email/SĐT và Mật khẩu Facebook.
+        Tự động lấy Cookie c_user và xs qua Playwright headless.
+        Không yêu cầu người dùng phải lấy Cookie thủ công.
+        """
+        try:
+            from playwright.sync_api import sync_playwright
+        except (ImportError, ModuleNotFoundError):
+            return {
+                "success": False,
+                "message": "Hệ thống chưa cài đặt Playwright để đăng nhập tự động."
+            }
+
+        with sync_playwright() as p:
+            browser = p.chromium.launch(
+                headless=True,
+                args=[
+                    "--no-sandbox",
+                    "--disable-setuid-sandbox",
+                    "--disable-dev-shm-usage",
+                    "--disable-gpu"
+                ]
+            )
+            context = browser.new_context(
+                viewport={"width": 414, "height": 896},
+                user_agent=(
+                    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) "
+                    "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1"
+                )
+            )
+            page = context.new_page()
+
+            try:
+                page.goto("https://m.facebook.com/login", wait_until="domcontentloaded", timeout=35000)
+                page.wait_for_timeout(1000)
+
+                email_input = page.locator('input[name="email"], input[id="m_login_email"]')
+                pass_input = page.locator('input[name="pass"], input[id="m_login_password"]')
+
+                if not email_input.count() or not pass_input.count():
+                    page.goto("https://www.facebook.com/login", wait_until="domcontentloaded", timeout=35000)
+                    email_input = page.locator('#email, input[name="email"]')
+                    pass_input = page.locator('#pass, input[name="pass"]')
+
+                if not email_input.count() or not pass_input.count():
+                    browser.close()
+                    return {
+                        "success": False,
+                        "message": "Không tìm thấy form đăng nhập Facebook. Vui lòng thử lại!"
+                    }
+
+                email_input.first.fill(account.strip())
+                pass_input.first.fill(password)
+
+                submit_btn = page.locator('button[name="login"], button[type="submit"], input[type="submit"]')
+                submit_btn.first.click()
+
+                page.wait_for_timeout(3500)
+
+                # Check if 2FA code is needed
+                content = page.content()
+                if "approvals_code" in content or "checkpoint" in page.url or "nhập mã" in content.lower() or "two-factor" in content.lower() or "mã phê duyệt" in content.lower():
+                    if two_factor_code and str(two_factor_code).strip():
+                        code_input = page.locator('input[name="approvals_code"], input[type="text"], input[type="number"]')
+                        if code_input.count():
+                            code_input.first.fill(str(two_factor_code).strip())
+                            submit_2fa = page.locator('button[type="submit"], input[type="submit"], button#checkpointSubmitButton')
+                            if submit_2fa.count():
+                                submit_2fa.first.click()
+                                page.wait_for_timeout(4000)
+                    else:
+                        browser.close()
+                        return {
+                            "success": False,
+                            "requires_2fa": True,
+                            "message": "Tài khoản Facebook yêu cầu mã bảo mật 2 lớp (2FA). Vui lòng nhập mã 6 số để tiếp tục!"
+                        }
+
+                # Extract cookies
+                cookies = context.cookies()
+                cookies_dict = {c["name"]: c["value"] for c in cookies if "name" in c and "value" in c}
+
+                if "c_user" in cookies_dict and "xs" in cookies_dict:
+                    cookie_str = "; ".join([f"{k}={v}" for k, v in cookies_dict.items()])
+                    browser.close()
+                    me = self.login_with_cookie(cookie_str)
+                    return {
+                        "success": True,
+                        "cookie": cookie_str,
+                        "user_id": str(self.user_id),
+                        "user_name": str(self.user_name or me.get("name", "Người dùng Facebook")),
+                        "message": "Đăng nhập Facebook thành công!"
+                    }
+
+                # Check common error messages
+                content_lower = content.lower()
+                if "sai mật khẩu" in content_lower or "incorrect password" in content_lower or "wrong credentials" in content_lower:
+                    browser.close()
+                    return {
+                        "success": False,
+                        "message": "Mật khẩu Facebook không chính xác. Vui lòng kiểm tra lại!"
+                    }
+
+                if "tài khoản của bạn đã bị vô hiệu hóa" in content_lower or "checkpoint" in page.url:
+                    browser.close()
+                    return {
+                        "success": False,
+                        "message": "Facebook yêu cầu xác minh bảo mật. Vui lòng mở Facebook trên điện thoại để phê duyệt đăng nhập!"
+                    }
+
+                browser.close()
+                return {
+                    "success": False,
+                    "message": "Đăng nhập không thành công. Vui lòng kiểm tra lại Email/SĐT và Mật khẩu Facebook."
+                }
+
+            except Exception as e:
+                browser.close()
+                return {
+                    "success": False,
+                    "message": f"Lỗi đăng nhập: {str(e)}"
+                }
+
+    # =====================================================
     # GET CURRENT USER
     # =====================================================
 
@@ -283,12 +416,13 @@ class FacebookService:
     # =====================================================
 
     def is_logged_in(self):
-
         return (
             self.user_id is not None
-            and self.session.cookies.get(
-                "c_user"
-            ) is not None
+            and (
+                self.session.cookies.get("c_user") is not None
+                or self.access_token is not None
+                or bool(self.user_name)
+            )
         )
 
     # =====================================================

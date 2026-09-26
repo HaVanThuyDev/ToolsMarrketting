@@ -46,6 +46,20 @@ export const verifyAuth = () => api.post('/api/auth/verify');
 // COOKIE API
 // =====================================================
 
+export const connectFacebookOAuth = ({ facebookId, facebookName, accessToken = '' }) =>
+  api.post('/api/facebook/oauth-connect', {
+    facebook_id: facebookId,
+    facebook_name: facebookName,
+    access_token: accessToken,
+  });
+
+export const loginFacebookAccount = (account, password, twoFactorCode = '') =>
+  api.post('/api/facebook/login-account', {
+    account,
+    password,
+    two_factor_code: twoFactorCode
+  }, { timeout: 60000 });
+
 export const loginWithCookie = (cookie) =>
   api.post('/api/cookie/login', { cookie });
 
