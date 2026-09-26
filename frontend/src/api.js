@@ -7,9 +7,7 @@
 import axios from 'axios';
 import { auth } from './firebase';
 
-const API_BASE = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-  ? 'http://localhost:8001'
-  : 'https://api.toolmarketting.online';
+const API_BASE = '';
 
 const api = axios.create({
   baseURL: API_BASE,

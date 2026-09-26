@@ -6,8 +6,10 @@ services:
       dockerfile: Dockerfile
     container_name: tool-marketing-backend
     restart: always
+    expose:
+      - "8001"
     ports:
-      - "8001:8001"
+      - "8002:8001"
     environment:
       - PYTHONUNBUFFERED=1
     networks:
@@ -21,6 +23,7 @@ services:
     container_name: tool-marketing-frontend
     restart: always
     ports:
+      - "8001:80"
       - "5173:80"
     depends_on:
       - backend
